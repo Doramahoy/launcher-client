@@ -28,9 +28,3 @@ def load_config_options():
         with open(config_file_options, 'r') as file:
             return json.load(file)
     return {}
-
-def load_refresh_token():
-    if os.path.exists(refresh_token_file):
-        with open(refresh_token_file, "r", encoding="utf-8") as file:
-            return json.load(file)
-    return {}

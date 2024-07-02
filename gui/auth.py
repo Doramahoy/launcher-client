@@ -13,10 +13,10 @@ except ImportError as e:
     logging.error(f"Missing required module: {e}. Please ensure minecraft_launcher_lib is installed.")
     exit(1)
 
-from config.config import load_config, save_config, load_refresh_token
+from config.config import load_config, save_config
 
 CLIENT_ID = "a85a2f79-1a21-4869-bb74-1132a755453b"
-REDIRECT_URL = "https://login.microsoftonline.com/common/oauth2/nativeclient"
+REDIRECT_URL = "https://login.live.com/oauth20_desktop.srf"
 
 class Auth(QDialog):
     closed = pyqtSignal()
@@ -27,7 +27,6 @@ class Auth(QDialog):
         
         self.init_ui()
         self.config = load_config()
-        self.config_token = load_refresh_token()
         self.load_user_list()
 
     def init_ui(self):
@@ -185,14 +184,23 @@ class Auth(QDialog):
         save_config(self.config)
         self.load_user_list()
 
+    def check_token_exists(self):
+        """Проверяет наличие токена для текущего пользователя в self.config."""
+        user_list = self.config.get('userSet', {}).get('list', [])
+        for user in user_list:
+            if 'token' in user and user['token']:
+                return True
+        return False
+
     def microsoft_login(self):
         """Выполняет вход через Microsoft."""
         self.web_view.show()
-        self.token = load_refresh_token()
 
-        if self.token:
+        token_exists = self.check_token_exists()
+
+        if token_exists and token_exists != '':
             try:
-                minecraft_launcher_lib.microsoft_account.complete_refresh(CLIENT_ID, None, REDIRECT_URL, self.token)
+                minecraft_launcher_lib.microsoft_account.complete_refresh(CLIENT_ID, None, REDIRECT_URL, token_exists)
             except minecraft_launcher_lib.exceptions.InvalidRefreshToken:
                 pass
 
