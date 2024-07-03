@@ -1,0 +1,5 @@
+coloredlogs
+PyQt5
+requests
+PyQtWebEngine
+minecraft-launcher-lib 
